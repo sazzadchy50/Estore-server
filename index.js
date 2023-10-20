@@ -13,6 +13,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wsx9xso.mongodb.net/?retryWrites=true&w=majority`;
 
+console.log(process.env.DB_USER);
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -30,7 +31,26 @@ const client = new MongoClient(uri, {
       await client.connect();
       const brandCollection = client.db('brandDB').collection('brand');
   
-      app.post('/brand', async(req, res)=>{
+      // app.get('/brand/:name', async (req, res) => {
+      //   const id = req.params.id;
+      //   const query = { _id: new ObjectId(id) };
+      //   const user = await userCollection.findOne(query);
+      //   console.log(user);
+      //   res.send(user)
+      // });
+
+      app.get('/brands/:name', async (req, res) => {
+        const brandName = req.params.name;
+        const brandData = await brandCollection.findOne({ brand: brandName });
+      
+        if (brandData) {
+          res.json(brandData);
+        } else {
+          res.status(404).json({ message: 'Brand not found' });
+        }
+      });
+
+      app.post('/brands', async(req, res)=>{
           const newBrand = req.body;
           console.log(newBrand);
           const result = await brandCollection.insertOne(newBrand)
